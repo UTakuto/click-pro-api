@@ -1,12 +1,16 @@
-# 🚀 Rails API Template with Docker
+# Click Pro PAI
 
-## このリポジトリは、Docker 環境上で Ruby on Rails（API モード）を素早く立ち上げるためのテンプレートです。
+## 概要
+
+2 年前期のクリエイティブワークの作品です。
+プロのカメラマンを目指す人たちや、写真の技術向上を目指し写真の撮影方法を学びたいと考えている人たち向け。
 
 ## 📦 使用技術
 
--   **Ruby on Rails (API モード)**
+-   **Ruby on Rails**
 -   **MySQL**
 -   **Docker / Docker Compose**
+-   **Cloudinary（画像保存用）**
 
 ---
 
@@ -26,13 +30,65 @@
 
 ---
 
+## 機能一覧 / API 仕様
+
+| エンドポイント | メソッド | 概要                 | 認証               |
+| -------------- | -------- | -------------------- | ------------------ |
+| /users         | POST     | ユーザー新規登録     | 不要               |
+| /login         | POST     | ログイン（JWT 発行） | 不要               |
+| /users/:id     | GET      | ユーザー情報取得     | 不要               |
+| /login         | POST     | ログイン（JWT 発行） | 不要               |
+| /photos        | GET      | 投稿一覧取得         | 不要               |
+| /photos/:id    | GET      | 投稿詳細取得         | 不要               |
+| /photos        | POST     | 新規投稿             | 必要               |
+| /photos/:id    | PATCH    | 投稿編集             | 必要（投稿者のみ） |
+| /photos/:id    | DELETE   | 投稿削除             | 必要（投稿者のみ） |
+
+## リクエスト・レスポンス一覧
+
+### /login リクエスト
+
+**概要**
+ログイン成功時、JWT トークンを返却します。
+このトークンは、認証が必要な API（投稿作成・編集・削除、自分のユーザー情報取得 など）で Authorization ヘッダーに付与して使用します。
+**POST /login**
+
+```
+{
+    "email": "test@example.com",
+    "password": "password"
+}
+```
+
+**/login レスポンス**
+**ログイン成功時**
+
+```
+{
+    "token": "xxxxx.yyyyy.zzzzz",
+    "user": {
+        "id": 1,
+        "name": "Test User",
+        "email": "test@example.com"
+    }
+}
+```
+
+**以降、リクエスト送る時 Headers に Token を入れてください**
+
+```
+Authorization: Bearer xxxxx.yyyyy.zzzzz
+```
+
+---
+
 ## 🛠 セットアップ手順
 
 ### 1. リポジトリをクローン
 
 ```bash
-git clone https://github.com/UTakuto/rails-template.git
-cd rails-template
+git clone https://github.com/UTakuto/click-pro-api.git
+cd click-pro-api
 ```
 
 ### 2. service ディレクトリ内で Rails API アプリを作成（初回のみ）
@@ -61,20 +117,13 @@ docker compose run web rails db:migrate
 ### 6. サーバ起動
 
 ```bash
-docker compose up
+docker compose up --build
 ```
 
 ---
 
 ## 🌐 アクセス
 
--   API エンドポイント: [http://localhost:3000](http://localhost:3000)
--   初期状態ではルートパスにアクセスすると Routing Error が出ますが、これは正常です（API のため HTML ルートが無いため）。
+-   API エンドポイント: [http://localhost:3004](http://localhost:3004)
 
 ---
-
-## 💬 備考
-
--   フロントエンド（Next.js など）と組み合わせて使用することを想定しています。
--   必要に応じて `CORS`, `Serializer`, `認証ライブラリ` を追加してください。
-    """

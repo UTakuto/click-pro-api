@@ -5,7 +5,6 @@ WORKDIR /service
 COPY Gemfile* /service/
 
 RUN bundle install
-RUN bundle exec rails db:migrate
 
 EXPOSE 3000
 

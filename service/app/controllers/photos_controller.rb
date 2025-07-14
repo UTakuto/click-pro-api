@@ -1,5 +1,6 @@
 class PhotosController < ApplicationController
-  before_action :authorize_request, only: [:create]
+  before_action :authorize_request, only: [:create, :update, :destroy]
+  before_action :set_photo, only: [:show, :update, :destroy]
 
   def index
     photos = Photo.all.includes(:user)
@@ -8,7 +9,7 @@ class PhotosController < ApplicationController
 
   def show
     photo = Photo.find(params[:id])
-    render json: photo, include: :user
+    render json: photo.as_json(include: { user: { only: [:id, :name] } })
   end
 
   def create
@@ -31,7 +32,7 @@ class PhotosController < ApplicationController
         description: params[:description]
       )
 
-      render json: photo, status: :created
+      render json: photo.as_json(include: { user: { only: [:id, :name] } }), status: :created
 
     rescue => e
       render json: { error: "アップロード失敗: #{e.message}" }, status: :unprocessable_entity
@@ -39,12 +40,22 @@ class PhotosController < ApplicationController
   end
 
   def update
-    if @photo.users != @current_user
+    if @photo.user != @current_user
       return render json: { error: "権限がありません" }, status: :forbidden
     end
 
-    if @photo.update(title: params[:title], description: params[:description])
-      render json: @photo, status: :ok
+    image_url = @photo.image_url
+
+    if params[:image].present?
+      result = Cloudinary::Uploader.upload(
+        params[:image],
+        upload_preset: ENV['CLOUDINARY_UPLOAD_PRESET']
+      )
+      image_url = result['secure_url']
+    end
+
+    if @photo.update(title: params[:title], image_url: image_url, description: params[:description])
+      render json: @photo.as_json(include: { user: { only: [:id, :name] } }), status: :ok
     else
       render json: { error: @photo.errors.full_messages }, status: :unprocessable_entity
     end

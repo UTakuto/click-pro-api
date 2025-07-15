@@ -54,7 +54,7 @@ class PhotosController < ApplicationController
       image_url = result['secure_url']
     end
 
-    if @photo.update(title: params[:title], image_url: image_url, description: params[:description])
+    if @photo.update(params.permit(:title, :image, :description))
       render json: @photo.as_json(include: { user: { only: [:id, :name, :email] } }), status: :ok
     else
       render json: { error: @photo.errors.full_messages }, status: :unprocessable_entity

@@ -8,10 +8,13 @@ class ApplicationController < ActionController::API
     token = header.split(' ').last if header
 
     begin
-      decoded = JWT.decode(token, Rails.application.secrets.secret_key_base)[0]
+      # JWTデコード時に有効期限チェックを有効化
+      decoded = JWT.decode(token, Rails.application.secret_key_base, true, { verify_expiration: true })[0]
       @current_user = User.find(decoded['user_id'])
     rescue JWT::DecodeError, ActiveRecord::RecordNotFound => e
       render json: { errors: "認証に失敗しました: #{e.message}" }, status: :unauthorized
+    rescue JWT::ExpiredSignature => e
+      render json: { errors: "トークンの有効期限が切れています" }, status: :unauthorized
     end
   end
 

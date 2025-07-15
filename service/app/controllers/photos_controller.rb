@@ -4,12 +4,12 @@ class PhotosController < ApplicationController
 
   def index
     photos = Photo.all.includes(:user)
-    render json: photos, include: :user
+    render json: photos, include:{ user:{ only: [:id, :name, :email] }}
   end
 
   def show
     photo = Photo.find(params[:id])
-    render json: photo.as_json(include: { user: { only: [:id, :name] } })
+    render json: photo.as_json(include:{ user:{ only: [:id, :name, :email] }})
   end
 
   def create
@@ -32,7 +32,7 @@ class PhotosController < ApplicationController
         description: params[:description]
       )
 
-      render json: photo.as_json(include: { user: { only: [:id, :name] } }), status: :created
+      render json: photo.as_json(include: { user: { only: [:id, :name, :email] } }), status: :created
 
     rescue => e
       render json: { error: "アップロード失敗: #{e.message}" }, status: :unprocessable_entity
@@ -55,7 +55,7 @@ class PhotosController < ApplicationController
     end
 
     if @photo.update(title: params[:title], image_url: image_url, description: params[:description])
-      render json: @photo.as_json(include: { user: { only: [:id, :name] } }), status: :ok
+      render json: @photo.as_json(include: { user: { only: [:id, :name, :email] } }), status: :ok
     else
       render json: { error: @photo.errors.full_messages }, status: :unprocessable_entity
     end

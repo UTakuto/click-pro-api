@@ -1,7 +1,7 @@
 # app/controllers/auth_controller.rb
 class AuthController < ApplicationController
   # トークンの有効期限（20分）
-  TOKEN_EXPIRATION_TIME = 1.minutes
+  TOKEN_EXPIRATION_TIME = 20.minutes
 
   def login
     user = User.find_by(email: params[:email])
